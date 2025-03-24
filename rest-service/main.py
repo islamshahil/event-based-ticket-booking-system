@@ -110,12 +110,15 @@ def cancel_booking(
 
 @app.get("/bookings/user/{user_id}")
 def get_user_bookings(user_id: int):
-    try:
-        resp = requests.get(f"{EVENT_SERVICE_URL}/bookings/user/{user_id}")
-        resp.raise_for_status()
-        return resp.json()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    message = {
+        "type": "get_user_bookings",
+        "user_id": user_id
+    }
+    result = send_request_and_wait(message)
+    if result:
+        return {"status": "User bookings retrieved", "result": result}
+    else:
+        raise HTTPException(status_code=504, detail="Processing timed out")
 
 @app.get("/events")
 def get_seat_availability(event_id: int):

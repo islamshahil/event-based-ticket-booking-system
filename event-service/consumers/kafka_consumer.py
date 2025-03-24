@@ -37,20 +37,16 @@ def consume_messages():
         try:
             if event_type == "book":
                 result = BookingService.book_seats(db, user_id, event_id, seat_ids)
-                reply = {
-                    "correlation_id": correlation_id,
-                    "result": result
-                }
-                producer_reply.send(TOPIC, reply, partition=1)
-                producer_reply.flush()
             elif event_type == "cancel":
                 result = BookingService.cancel_bookings(db, booking_id, event_id, seat_id)
-                reply = {
-                    "correlation_id": correlation_id,
-                    "result": result
-                }
-                producer_reply.send(TOPIC, reply, partition=1)
-                producer_reply.flush()
+            elif event_type == "get_user_bookings":
+                result = BookingService.get_user_bookings(db, booking_id, event_id, seat_id)
+            reply = {
+                "correlation_id": correlation_id,
+                "result": result
+            }
+            producer_reply.send(TOPIC, reply, partition=1)
+            producer_reply.flush()
         finally:
             db.close()
 

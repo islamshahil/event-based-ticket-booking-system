@@ -86,3 +86,20 @@ class BookingService:
             return {f"{booking} cancelled succesfully"}
         except Exception as e:
             return {f"Cancellation Failed {str(e)}"}
+        
+
+    @staticmethod
+    def get_user_bookings(db: Session, user_id: int):
+        try:
+            bookings = BookingRepository.get_bookings_by_user(db, user_id)
+            return [
+                {
+                    "id": b.id,
+                    "event_id": b.event_id,
+                    "seat_id": b.seat_id,
+                    "status": b.status
+                } for b in bookings
+            ]
+        except Exception as e:
+            return {f"Error: {str(e)}"}
+        
