@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  rest-service:
+    build: ./rest-service
+    container_name: rest-service
+    environment:
+      # Use your external Kafka broker and internal URLs for inter-service calls
+      KAFKA_BOOTSTRAP_SERVERS: "192.168.0.106:9092"
+      EVENT_SERVICE_URL: "http://event-service:8001"
+      CACHE_SERVICE_URL: "http://cache-service:8002"
+    ports:
+      - "5000:5000"
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"]
+
+  event-service:
+    build: ./event-service
+    container_name: event-service
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: "192.168.0.106:9092"
+      DATABASE_URL: "postgresql://admin:mypassword@192.168.0.106:5432/ticket_booking"
+    ports:
+      - "8001:8001"
+
+  cache-service:
+    build: ./cache-service
+    container_name: cache-service
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: "192.168.0.106:9092"
+      REDIS_URL: "redis://:mypassword@192.168.0.106:6379"
+    ports:
+      - "8002:8002"
