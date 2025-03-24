@@ -1,11 +1,20 @@
 import os
+import json
 import redis
 from sqlalchemy.orm import Session
+from kafka import KafkaProducer
 from repositories.booking_repository import BookingRepository
-from repositories.seat_repository import SeatRepository
+from repositories.event_repository import SeatRepository
 
 CACHE_SERVICE_URL = os.getenv("CACHE_SERVICE_URL", "http://localhost:8002")
 redis_client = redis.from_url(CACHE_SERVICE_URL)
+
+KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+
+producer = KafkaProducer(
+    bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
+    value_serializer=lambda v: json.dumps(v).encode("utf-8")
+)
 
 
 class BookingService:
@@ -22,7 +31,14 @@ class BookingService:
                     return {"status": f"{seat_id} is already booked"}
 
                 # Mark the seat as booked in Redis.
-                redis_client.set(cache_key, "booked")
+                # redis_client.set(cache_key, "booked")
+                event_data = {
+                    "type": "book",
+                    "event_id": event_id,
+                    "seat_id": seat_id
+                }
+                producer.send("booking-topic", event_data)
+                producer.flush()
 
                 # Retrieve the seat from the database.
                 seat = SeatRepository.get_seats_by_ids(db, event_id, seat_id)
@@ -38,15 +54,26 @@ class BookingService:
             
             return booked_booking_ids
         except Exception as e:
-            redis_client.set(cache_key, "available")
+            event_data = {
+                "type": "cancel",
+                "event_id": event_id,
+                "seat_id": seat_id
+            }
+            producer.send("booking-topic", event_data)
+            producer.flush()
             return {f"Booking Failed {str(e)}"}
 
 
     @staticmethod
     def cancel_bookings(db: Session, booking_id: int, event_id: int, seat_id: int):
         try:
-            cache_key = f"seat:{seat.id}"
-            redis_client.set(cache_key, "available")
+            event_data = {
+                "type": "cancel",
+                "event_id": event_id,
+                "seat_id": seat_id
+            }
+            producer.send("booking-topic", event_data)
+            producer.flush()
 
             seat = SeatRepository.get_seats_by_ids(db, event_id, seat_id)
             seat.is_booked = False

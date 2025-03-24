@@ -12,7 +12,7 @@ app = FastAPI(title="REST Service")
 # Environment Variables
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 EVENT_SERVICE_URL = os.getenv("EVENT_SERVICE_URL", "http://localhost:8001")
-CACHE_SERVICE_URL = os.getenv("CACHE_SERVICE_URL", "http://localhost:8002")
+# CACHE_SERVICE_URL = os.getenv("CACHE_SERVICE_URL", "http://localhost:8002")
 
 # Kafka topic details
 TOPIC = "booking-topic"
@@ -117,10 +117,24 @@ def get_user_bookings(user_id: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/seats/{event_id}")
+@app.get("/events")
 def get_seat_availability(event_id: int):
     try:
-        resp = requests.get(f"{CACHE_SERVICE_URL}/seats/{event_id}")
+        resp = requests.get(f"{EVENT_SERVICE_URL}/events")
+        resp.raise_for_status()
+        return resp.json()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/events/seats/{event_id}")
+def get_seat_availability(event_id: str):
+    try:
+        if event_id == "*":
+            url = f"{EVENT_SERVICE_URL}/events/seats"
+        else:
+            int_event_id = int(event_id)
+            url = f"{EVENT_SERVICE_URL}/events/seats/{int_event_id}"
+        resp = requests.get(url)
         resp.raise_for_status()
         return resp.json()
     except Exception as e:
