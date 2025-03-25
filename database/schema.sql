@@ -1,0 +1,32 @@
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE events (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    date TIMESTAMP NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    total_seats INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE seats (
+    id SERIAL PRIMARY KEY,
+    event_id INT REFERENCES events(id) ON DELETE CASCADE,
+    seat_number VARCHAR(10) NOT NULL,
+    is_booked BOOLEAN DEFAULT FALSE,
+    booked_by INT REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE bookings (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id) ON DELETE CASCADE,
+    event_id INT REFERENCES events(id) ON DELETE CASCADE,
+    seat_id INT REFERENCES seats(id) ON DELETE CASCADE,
+    status VARCHAR(20) CHECK (status IN ('CONFIRMED', 'CANCELED')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
