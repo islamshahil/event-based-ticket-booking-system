@@ -5,7 +5,7 @@ A event-based, real-time ticket booking system designed to handle high concurren
 
 ---
 
-## 5️⃣ System Design Documentation
+##  System Design Documentation
 
 📷 **Architecture Diagram:**  
 ![System Architecture](./docs/architecture-diagram.png)
@@ -26,7 +26,7 @@ A event-based, real-time ticket booking system designed to handle high concurren
 
 ---
 
-## 1️⃣ Low-Level Database Design Diagram
+##  Low-Level Database Design Diagram
 
 The system uses PostgreSQL for structured booking data with proper relationships and indexes to ensure high performance.
 
@@ -45,7 +45,7 @@ The system uses PostgreSQL for structured booking data with proper relationships
 
 ---
 
-## 2️⃣ Queueing Mechanism for First-Come-First-Serve Booking
+##  Queueing Mechanism for First-Come-First-Serve Booking
 
 The system ensures FCFS fairness using:
 
@@ -64,7 +64,7 @@ The system ensures FCFS fairness using:
 
 ---
 
-## 3️⃣ Real-Time Seat Availability Updates
+##  Real-Time Seat Availability Updates
 
 The system provides real-time UI updates through:
 
@@ -73,7 +73,7 @@ The system provides real-time UI updates through:
 
 ---
 
-## 4️⃣ Scalability & Resilience Strategy
+##  Scalability & Resilience Strategy
 
 - **Scalability:**
   - All the services are running individually and can be horizontally scaled.
